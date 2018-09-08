@@ -1,0 +1,33 @@
+<head>
+  <title>server-autorun-reuse</title>
+</head>
+
+<body>
+  <h1>Server autorun observer re-use</h1>
+  {{> subs}}
+  <p>
+    Once started, the subscription will re-run every 10 seconds. In server console you can see each re-run
+    being logged as well as the unique ID for each PollingObserveDriver. The ID is different every time, which
+    shows that observers on not reused on re-runs despite having identical selector + options.
+  </p>
+  <p>To prove that this results in additional queries to mongo, do the following:</p>
+  <ol>
+    <li>Connect to mongo shell: <code>meteor mongo</code></li>
+    <li>Set profiling level to log all queries: <code>db.setProfilingLevel(2)</code></li>
+    <li>Query count of all queries from the findOne: <code>db.system.profile.find({ns: 'meteor.collectionA', 'command.filter.testField': 'abc' }).count()</code></li>
+  </ol>
+  <p>You'll find that each autorun increments the count of queries</p>
+  <p>
+    One issue that stands out here is that <b>each re-run trigger 2 mongo queries!</b>
+    We can confirm that this is an issue specific to the server autorun package by commenting out the
+    autorun, adding <code>{ disableOplog: true }</code> to the findOne and starting the subscription.
+  </p>
+</body>
+
+<template name="subs">
+  {{#if isActive}}
+    <a href="#" class="js-stop">Stop subscription</a>
+  {{else}}
+    <a href="#" class="js-start">Start subscription</a>
+  {{/if}}
+</template>
