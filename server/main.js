@@ -10,18 +10,18 @@ Meteor.setInterval(() => {
 }, 10000);
 
 Meteor.publish('testObserverReuse', function testObserverReuse() {
-  this.autorun(() => {
+  // this.autorun(() => {
     const tick = tickTock.get();
     console.log('re-running');
     CollectionA.findOne(
       { testField: 'abc' },
-      { fields: { testField: 1 } }
+      { fields: { testField: 1 }, disableOplog: true }
     );
     return CollectionB.find(
       { createdAt: { $gt: tick } },
       { fields: { testField: 1 } }
     );
-  });
+  // });
 });
 
 // meteor mongo
